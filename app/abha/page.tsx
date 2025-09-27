@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,11 +26,16 @@ enum OtherAuthStep {
 }
 
 export default function AbhaRegistration() {
+  const router = useRouter();
+  
+  const VALID_AADHAAR = '123456789012';
+  const VALID_OTP = '123456';
+  const VALID_MOBILE = '9876543210';
+  
   // Tab state
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [authMethod, setAuthMethod] = useState<'aadhaar' | 'other'>('aadhaar');
   
-  // Aadhaar authentication states
   const [aadhaarStep, setAadhaarStep] = useState<AadhaarAuthStep>(AadhaarAuthStep.ENTER_AADHAAR);
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [abhaNumber, setAbhaNumber] = useState('');
@@ -47,6 +53,10 @@ export default function AbhaRegistration() {
   
   // Handle Aadhaar OTP request
   const handleRequestAadhaarOtp = () => {
+    if (aadhaarNumber !== VALID_AADHAAR) {
+      alert('Invalid Aadhaar number! Please use: ' + VALID_AADHAAR);
+      return;
+    }
     console.log('Requesting OTP for Aadhaar:', aadhaarNumber);
     // Call Aadhaar OTP API here
     setAadhaarStep(AadhaarAuthStep.VERIFY_OTP);
@@ -55,16 +65,29 @@ export default function AbhaRegistration() {
   // Handle Aadhaar OTP verification
   const handleVerifyAadhaarOtp = (otp: string) => {
     console.log('Verifying OTP:', otp, 'for Aadhaar:', aadhaarNumber);
+    if (otp !== VALID_OTP) {
+      alert('Invalid OTP! Please use: ' + VALID_OTP);
+      return;
+    }
     // Call Aadhaar OTP verification API here
     
     // Generate mock ABHA number
     const mockAbhaNumber = '12-3456-7890-1234';
     setAbhaNumber(mockAbhaNumber);
     setAadhaarStep(AadhaarAuthStep.SUCCESS);
+    
+    // Redirect to home page after 3 seconds
+    setTimeout(() => {
+      router.push('/');
+    }, 3000);
   };
   
   // Handle Mobile OTP request
   const handleRequestMobileOtp = () => {
+    if (mobile !== VALID_MOBILE) {
+      alert('Invalid mobile number! Please use: ' + VALID_MOBILE);
+      return;
+    }
     console.log('Requesting OTP for mobile:', mobile);
     // Call Mobile OTP API here
     setOtherStep(OtherAuthStep.VERIFY_MOBILE_OTP);
@@ -73,6 +96,10 @@ export default function AbhaRegistration() {
   // Handle Mobile OTP verification
   const handleVerifyMobileOtp = (otp: string) => {
     console.log('Verifying OTP:', otp, 'for mobile:', mobile);
+    if (otp !== VALID_OTP) {
+      alert('Invalid OTP! Please use: ' + VALID_OTP);
+      return;
+    }
     // Call Mobile OTP verification API here
     setOtherStep(OtherAuthStep.UPLOAD_DOCUMENTS);
   };
@@ -90,6 +117,11 @@ export default function AbhaRegistration() {
     const mockEnrollmentNumber = 'ENR' + Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');
     setEnrollmentNumber(mockEnrollmentNumber);
     setOtherStep(OtherAuthStep.SUCCESS);
+    
+    // Redirect to home page after 3 seconds
+    setTimeout(() => {
+      router.push('/');
+    }, 3000);
   };
   
   // Handle method change
@@ -210,10 +242,20 @@ export default function AbhaRegistration() {
                     </div>
                     
                     <div className="mt-6">
+                      <Button 
+                        className="bg-green-600 hover:bg-green-700 text-white mr-4"
+                        onClick={() => router.push('/')}
+                      >
+                        Go to Dashboard
+                      </Button>
                       <Button className="bg-green-600 hover:bg-green-700 text-white">
                         Download ABHA Card
                       </Button>
                     </div>
+                    
+                    <p className="text-sm text-gray-500 mt-4">
+                      Redirecting to dashboard in 3 seconds...
+                    </p>
                   </div>
                 )}
               </div>
@@ -325,10 +367,6 @@ export default function AbhaRegistration() {
                 
                 {otherStep === OtherAuthStep.VERIFY_MOBILE_OTP && (
                   <div>
-                    <p className="text-sm text-gray-600 mb-4">
-                      We've sent a verification code to +91 {mobile}
-                    </p>
-                    
                     <OTPVerification
                       onVerify={handleVerifyMobileOtp}
                       onResend={() => console.log('Resending OTP')}
@@ -385,6 +423,15 @@ export default function AbhaRegistration() {
                     
                     <div className="mt-4 text-sm text-gray-600">
                       <p>You will receive your ABHA number on your registered mobile number once verification is complete.</p>
+                      <Button 
+                        className="bg-green-600 hover:bg-green-700 text-white mt-4"
+                        onClick={() => router.push('/')}
+                      >
+                        Go to Dashboard
+                      </Button>
+                      <p className="text-sm text-gray-500 mt-2">
+                        Redirecting to dashboard in 3 seconds...
+                      </p>
                     </div>
                   </div>
                 )}

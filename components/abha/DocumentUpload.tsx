@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Image from 'next/image';
 import { Button } from '../ui/button';
 
 interface DocumentUploadProps {
@@ -15,13 +14,33 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ label, id, onUpload }) 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
+      
+      // Validate file size (10MB limit)
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB');
+        return;
+      }
+      
+      // Validate file type
+      if (!selectedFile.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
       setFile(selectedFile);
       onUpload(selectedFile);
       
       // Create preview
       const reader = new FileReader();
       reader.onload = () => {
-        setPreview(reader.result as string);
+        if (reader.result) {
+          setPreview(reader.result as string);
+        }
+      };
+      reader.onerror = () => {
+        alert('Error reading file');
+        setFile(null);
+        setPreview(null);
       };
       reader.readAsDataURL(selectedFile);
     }
@@ -30,6 +49,11 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ label, id, onUpload }) 
   const handleRemove = () => {
     setFile(null);
     setPreview(null);
+    // Reset the input value
+    const input = document.getElementById(id) as HTMLInputElement;
+    if (input) {
+      input.value = '';
+    }
   };
 
   return (
@@ -73,13 +97,25 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ label, id, onUpload }) 
         </div>
       ) : (
         <div className="relative border rounded-lg overflow-hidden">
-          <div className="relative h-60 w-full">
-            <Image
-              src={preview!}
-              alt="Document preview"
-              fill
-              style={{ objectFit: 'contain' }}
-            />
+          <div className="relative h-60 w-full bg-gray-50 flex items-center justify-center">
+            {preview ? (
+              <img
+                src={preview}
+                alt="Document preview"
+                className="w-full h-full object-contain"
+                onError={() => {
+                  console.error('Failed to load image preview');
+                  setPreview(null);
+                }}
+              />
+            ) : (
+              <div className="text-gray-500 text-center">
+                <svg className="h-12 w-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p>Preview not available</p>
+              </div>
+            )}
           </div>
           <div className="absolute top-2 right-2">
             <Button
