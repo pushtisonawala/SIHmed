@@ -40,7 +40,6 @@ export default function AbhaRegistration() {
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [abhaNumber, setAbhaNumber] = useState('');
 
-  // Other documents authentication states
   const [otherStep, setOtherStep] = useState<OtherAuthStep>(OtherAuthStep.ENTER_DETAILS);
   const [name, setName] = useState('');
   const [dob, setDob] = useState<Date | undefined>(undefined);
@@ -51,7 +50,6 @@ export default function AbhaRegistration() {
   const [backDocument, setBackDocument] = useState<File | null>(null);
   const [enrollmentNumber, setEnrollmentNumber] = useState('');
   
-  // Handle Aadhaar OTP request
   const handleRequestAadhaarOtp = () => {
     if (aadhaarNumber !== VALID_AADHAAR) {
       alert('Invalid Aadhaar number! Please use: ' + VALID_AADHAAR);
